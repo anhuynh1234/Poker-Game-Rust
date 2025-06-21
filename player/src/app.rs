@@ -2,7 +2,8 @@ use crate::draw_in_game;
 use crate::draw_ready;
 use crate::draw_spectator_page;
 use crate::draw_stats_page;
-use crate::ui::*;
+use crate::egui::TextureHandle;
+use crate::screens::*;
 use crate::App;
 use crate::AppState;
 use crate::Arc;
@@ -33,6 +34,7 @@ pub struct PlayerApp {
     pub ui_to_net_tx: Option<Sender<String>>,
     /// Channel to receive messages from the network thread.
     pub net_to_ui_rx: Option<Receiver<String>>,
+    pub logo_texture: Option<TextureHandle>,
 }
 
 impl Default for PlayerApp {

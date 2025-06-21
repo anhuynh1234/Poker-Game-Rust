@@ -29,6 +29,7 @@
 //! - std::net (for TCP streams)
 
 mod app;
+mod screens;
 mod tests;
 mod ui;
 
