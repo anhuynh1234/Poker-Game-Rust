@@ -54,6 +54,7 @@ impl Default for PlayerApp {
             game_state: Arc::new(Mutex::new(String::new())),
             ui_to_net_tx: None,
             net_to_ui_rx: None,
+            logo_texture: None,
         }
     }
 }
