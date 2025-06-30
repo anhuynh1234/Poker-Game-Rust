@@ -70,47 +70,6 @@ pub enum AppState {
     Spectator,
 }
 
-/// Draws the "Ready" screen where the player can start the game or view stats.
-///
-/// - Allows the player to signal they are ready to play the game.
-/// - Allows navigating to the stats page
-fn draw_ready(app: &mut PlayerApp, ctx: &egui::Context) {
-    egui::CentralPanel::default().show(ctx, |ui| {
-        ui.heading("Ready");
-        if ui.button("Ready").clicked() {
-            if let Some(tx) = &app.ui_to_net_tx {
-                // Send a "button1" command.
-                let msg = json!({
-                    "command": "ready",
-                    "username": app.username
-                })
-                .to_string();
-
-                let _ = tx.send(msg);
-            }
-
-            app.state = AppState::InGame;
-        }
-
-        if ui.button("See Stats").clicked() {
-            if let Some(tx) = &app.ui_to_net_tx {
-                let msg = json!({
-                    "command": "stats",
-                })
-                .to_string();
-
-                let _ = tx.send(msg);
-            }
-
-            app.state = AppState::Stats;
-        }
-
-        if ui.button("Spectate").clicked() {
-            app.state = AppState::Spectator;
-        }
-    });
-}
-
 /// Draws the player statistics page.
 ///
 /// - Displays a list of players.

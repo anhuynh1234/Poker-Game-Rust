@@ -85,7 +85,7 @@ pub fn draw_auth_screen(app: &mut PlayerApp, ctx: &egui::Context) {
 
                 ui.vertical_centered(|ui| {
                     ui.label(RichText::new("Password:").italics());
-                    ui.text_edit_singleline(&mut app.password);
+                    ui.add(egui::TextEdit::singleline(&mut app.password).password(true));
                 });
 
                 ui.vertical_centered(|ui| {
