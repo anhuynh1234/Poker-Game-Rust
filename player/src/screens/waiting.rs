@@ -22,37 +22,6 @@ pub fn draw_ready(app: &mut PlayerApp, ctx: &egui::Context) {
     egui::CentralPanel::default()
         .frame(Frame::default().fill(BACKGROUND_COLOR))
         .show(ctx, |ui| {
-            if let Some(texture) = &app.table_texture {
-                let painter = ui.painter();
-                let screen_rect = ui.max_rect();
-
-                let screen_width = screen_rect.width();
-                let screen_height = screen_rect.height();
-
-                // Desired dimensions
-                let img_width = screen_width * 0.8;
-                let img_height = screen_height * 0.5;
-
-                // Center the image in the panel
-                let img_x = screen_rect.left() + (screen_width - img_width) / 2.0;
-                let img_y = screen_rect.top() + (screen_height - img_height) / 2.0;
-
-                let image_rect = egui::Rect::from_min_size(
-                    egui::pos2(img_x, img_y),
-                    egui::vec2(img_width, img_height),
-                );
-
-                painter.image(
-                    texture.id(),
-                    image_rect,
-                    egui::Rect::from_min_max(
-                        egui::Pos2::ZERO,
-                        egui::Pos2::new(texture.size_vec2().x, texture.size_vec2().y),
-                    ),
-                    egui::Color32::WHITE,
-                );
-            }
-
             ScrollArea::vertical().show(ui, |ui| {
                 ui.vertical_centered(|ui| {
                     ui.add_space(20.0);
@@ -73,6 +42,25 @@ pub fn draw_ready(app: &mut PlayerApp, ctx: &egui::Context) {
                     }
 
                     app.state = AppState::InGame;
+                }
+
+                if let Some(texture) = &app.logo_texture {
+                    // Get available width of the panel
+                    let available_width = ui.available_width();
+
+                    // Desired width: e.g. 50% of available width
+                    let desired_width = available_width * 0.3;
+
+                    // Keep aspect ratio
+                    let aspect_ratio = texture.size()[0] as f32 / texture.size()[1] as f32;
+                    let desired_height = desired_width / aspect_ratio;
+
+                    // Center horizontally
+                    ui.vertical_centered(|ui| {
+                        ui.image((texture.id(), egui::vec2(desired_width, desired_height)));
+                    });
+
+                    ui.add_space(20.0); // Optional vertical spacing
                 }
 
                 if ui.button("See Stats").clicked() {
