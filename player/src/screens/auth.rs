@@ -1,6 +1,7 @@
 use crate::egui::ScrollArea;
 use crate::ui::auth::color::*;
 use crate::ui::auth::images::*;
+use crate::ui::cards::load_card_texture;
 use crate::AppState;
 use crate::Mode;
 use crate::PlayerApp;
@@ -171,6 +172,15 @@ pub fn draw_auth_screen(app: &mut PlayerApp, ctx: &egui::Context) {
 
                 ui.vertical_centered(|ui| {
                     ui.label(format!("Server response: {}", reply));
+                });
+
+                ui.horizontal(|ui| {
+                    if let Some(texture) = load_card_texture(ctx, "5 of Spades") {
+                        ui.image((texture.id(), egui::vec2(60.0, 100.0)));
+                    }
+                    if let Some(texture) = load_card_texture(ctx, "Q of Spades") {
+                        ui.image((texture.id(), egui::vec2(100.0, 200.0)));
+                    }
                 });
 
                 // If the server response indicates a successful login, spawn the persistent thread.

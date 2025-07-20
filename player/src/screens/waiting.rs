@@ -2,11 +2,12 @@ use crate::egui::RichText;
 use crate::egui::ScrollArea;
 use crate::ui::waiting::color::BACKGROUND_COLOR;
 use crate::ui::waiting::color::HEADING_COLOR;
-use crate::ui::waiting::images::load_poker_table;
 use crate::AppState;
 use crate::PlayerApp;
 use eframe::egui;
+use eframe::egui::Align;
 use eframe::egui::Frame;
+use eframe::egui::Layout;
 use serde_json::json;
 
 /// Draws the "Ready" screen where the player can start the game or view stats.
@@ -15,82 +16,69 @@ use serde_json::json;
 /// - Allows navigating to the stats page
 /// - Allows player to spectate the current game
 pub fn draw_ready(app: &mut PlayerApp, ctx: &egui::Context) {
-    if app.table_texture.is_none() {
-        app.table_texture = load_poker_table(ctx);
-    }
-
     egui::CentralPanel::default()
         .frame(Frame::default().fill(BACKGROUND_COLOR))
         .show(ctx, |ui| {
-            if let Some(texture) = &app.table_texture {
-                let painter = ui.painter();
-                let screen_rect = ui.max_rect();
-
-                let screen_width = screen_rect.width();
-                let screen_height = screen_rect.height();
-
-                // Desired dimensions
-                let img_width = screen_width * 0.8;
-                let img_height = screen_height * 0.5;
-
-                // Center the image in the panel
-                let img_x = screen_rect.left() + (screen_width - img_width) / 2.0;
-                let img_y = screen_rect.top() + (screen_height - img_height) / 2.0;
-
-                let image_rect = egui::Rect::from_min_size(
-                    egui::pos2(img_x, img_y),
-                    egui::vec2(img_width, img_height),
-                );
-
-                painter.image(
-                    texture.id(),
-                    image_rect,
-                    egui::Rect::from_min_max(
-                        egui::Pos2::ZERO,
-                        egui::Pos2::new(texture.size_vec2().x, texture.size_vec2().y),
-                    ),
-                    egui::Color32::WHITE,
-                );
-            }
-
             ScrollArea::vertical().show(ui, |ui| {
+                // Show logo
+                if let Some(texture) = &app.logo_texture {
+                    // Get available width of the panel
+                    let available_width = ui.available_width();
+
+                    // Desired width: e.g. 50% of available width
+                    let desired_width = available_width * 0.3;
+
+                    // Keep aspect ratio
+                    let aspect_ratio = texture.size()[0] as f32 / texture.size()[1] as f32;
+                    let desired_height = desired_width / aspect_ratio;
+
+                    // Center horizontally
+                    ui.vertical_centered(|ui| {
+                        ui.image((texture.id(), egui::vec2(desired_width, desired_height)));
+                    });
+
+                    ui.add_space(20.0); // Optional vertical spacing
+                }
+
                 ui.vertical_centered(|ui| {
                     ui.add_space(20.0);
                     ui.colored_label(HEADING_COLOR, RichText::new("Ready").heading().strong());
-                    ui.add_space(10.0);
+                    ui.add_space(20.0);
                 });
 
-                if ui.button("Ready").clicked() {
-                    if let Some(tx) = &app.ui_to_net_tx {
-                        // Send a "button1" command.
-                        let msg = json!({
-                            "command": "ready",
-                            "username": app.username
-                        })
-                        .to_string();
+                ui.separator();
+                ui.add_space(20.0);
 
-                        let _ = tx.send(msg);
-                    }
+                ui.with_layout(Layout::bottom_up(Align::Center), |ui| {
+                    ui.vertical_centered(|ui| {
+                        if ui.button("Ready").clicked() {
+                            if let Some(tx) = &app.ui_to_net_tx {
+                                let msg = json!({
+                                    "command": "ready",
+                                    "username": app.username
+                                })
+                                .to_string();
+                                let _ = tx.send(msg);
+                            }
+                            app.state = AppState::InGame;
+                        }
 
-                    app.state = AppState::InGame;
-                }
+                        if ui.button("See Stats").clicked() {
+                            if let Some(tx) = &app.ui_to_net_tx {
+                                let msg = json!({
+                                    "command": "stats",
+                                })
+                                .to_string();
+                                let _ = tx.send(msg);
+                            }
+                            app.state = AppState::Stats;
+                        }
 
-                if ui.button("See Stats").clicked() {
-                    if let Some(tx) = &app.ui_to_net_tx {
-                        let msg = json!({
-                            "command": "stats",
-                        })
-                        .to_string();
-
-                        let _ = tx.send(msg);
-                    }
-
-                    app.state = AppState::Stats;
-                }
-
-                if ui.button("Spectate").clicked() {
-                    app.state = AppState::Spectator;
-                }
+                        if ui.button("Spectate").clicked() {
+                            app.state = AppState::Spectator;
+                        }
+                    });
+                });
             });
         });
 }

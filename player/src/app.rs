@@ -1,6 +1,4 @@
-use crate::draw_in_game;
 use crate::draw_spectator_page;
-use crate::draw_stats_page;
 use crate::egui::TextureHandle;
 use crate::screens::*;
 use crate::App;
@@ -11,7 +9,7 @@ use crate::Mode;
 use crate::Mutex;
 use crate::Receiver;
 use crate::Sender;
-use eframe::egui; // or `use crate::egui;` depending on where egui is defined
+use eframe::egui; // or `use crate::egui;` depending on where egui is defineduse eframe::CreationContext;
 use eframe::Frame; // or `use crate::Frame;` or `use crate::egui::Frame;` if Frame is re-exported there
 
 pub struct PlayerApp {
@@ -34,7 +32,6 @@ pub struct PlayerApp {
     /// Channel to receive messages from the network thread.
     pub net_to_ui_rx: Option<Receiver<String>>,
     pub logo_texture: Option<TextureHandle>,
-    pub table_texture: Option<TextureHandle>,
 }
 
 impl Default for PlayerApp {
@@ -55,7 +52,6 @@ impl Default for PlayerApp {
             ui_to_net_tx: None,
             net_to_ui_rx: None,
             logo_texture: None,
-            table_texture: None,
         }
     }
 }
